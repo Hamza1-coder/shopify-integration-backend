@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - REDIS_URL=redis://redis:6379/0
+      - DB_NAME=shopify
+      - DB_USER=shopify
+      - DB_PASSWORD=shopify
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - redis
+      - postgres
+    command: python manage.py runserver 0.0.0.0:8000
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: shopify
+      POSTGRES_USER: shopify
+      POSTGRES_PASSWORD: shopify
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  celery:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - REDIS_URL=redis://redis:6379/0
+      - DB_NAME=shopify
+      - DB_USER=shopify
+      - DB_PASSWORD=shopify
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - redis
+      - postgres
+    command: celery -A shopify_backend worker -l info
+
+  celery-beat:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - REDIS_URL=redis://redis:6379/0
+      - DB_NAME=shopify
+      - DB_USER=shopify
+      - DB_PASSWORD=shopify
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - redis
+      - postgres
+    command: celery -A shopify_backend beat -l info
+
+volumes:
+  redis_data:
+  postgres_data:
