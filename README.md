@@ -37,7 +37,7 @@ A comprehensive Django REST Framework backend system that integrates with Shopif
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Hamza1-coder/shopify-integration-backend.git
    cd shopify-integration-backend
    ```
 
